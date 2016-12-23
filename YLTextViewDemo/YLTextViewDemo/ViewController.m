@@ -20,7 +20,7 @@
     self.view.backgroundColor = [UIColor lightGrayColor];
     
     UITextView *textView = [[UITextView alloc] init];
-    textView.frame = CGRectMake(0, 0, 200, 200);
+    textView.frame = CGRectMake(0, 0, 200, 150);
     textView.center = self.view.center;
     textView.placeholder = @"欢迎star";
     textView.limitLength = @20;

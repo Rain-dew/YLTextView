@@ -15,7 +15,7 @@
 
 #import "UITextView+YLTextView.h"
 #import <objc/runtime.h>
-@interface UITextView ()<UITextViewDelegate>
+@interface UITextView ()
 @property (nonatomic,strong) UILabel *placeholderLabel;//占位符
 @property (nonatomic,strong) UILabel *wordCountLabel;//计算字数
 @end
@@ -36,6 +36,8 @@ static const void *limitLengthKey = &limitLengthKey;
     Method yl_setText = class_getInstanceMethod([UITextView class], @selector(yl_setText:));
     method_exchangeImplementations(setText, yl_setText);
     
+    
+
     
     
 }
@@ -71,8 +73,6 @@ static const void *limitLengthKey = &limitLengthKey;
 - (NSString *)placeholder {
 
     return objc_getAssociatedObject(self, &PLACEHOLD);
-
-
 }
 
 
@@ -101,12 +101,11 @@ static const void *limitLengthKey = &limitLengthKey;
     
 }
 
-
-
 #pragma mark -- 配置占位符标签
 
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
 
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldChanged:) name:UITextViewTextDidChangeNotification object:self];
     /*
      *  占位字符
      */
@@ -118,7 +117,6 @@ static const void *limitLengthKey = &limitLengthKey;
     self.placeholderLabel.textColor = [UIColor lightGrayColor];
     CGRect rect = [placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:13.]} context:nil];
     self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
-    self.delegate = self;
     [self addSubview:self.placeholderLabel];
 
 }
@@ -135,7 +133,6 @@ static const void *limitLengthKey = &limitLengthKey;
     self.wordCountLabel.textColor = [UIColor lightGrayColor];
     self.wordCountLabel.font = [UIFont systemFontOfSize:13.];
     self.wordCountLabel.text = [NSString stringWithFormat:@"0/%@",limitLength];
-    self.delegate = self;
     [self addSubview:self.wordCountLabel];
 }
 
@@ -156,36 +153,35 @@ static const void *limitLengthKey = &limitLengthKey;
 }
 
 
-#pragma mark -- TextViewDelegate
+#pragma mark -- NSNotification
 
-
-- (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-
-
+- (void)textFieldChanged:(NSNotification *)notification {
     if (self.placeholder) {
         self.placeholderLabel.hidden = YES;
-
-        if (textView.text.length == 1 && text.length == 0) {
-
+        
+        if (self.text.length == 0) {
+            
             self.placeholderLabel.hidden = NO;
         }
     }
-
-    return YES;
-}
-
-- (void)textViewDidChange:(UITextView *)textView {
-
     if (self.limitLength) {
-
-        NSInteger wordCount = textView.text.length;
+        
+        NSInteger wordCount = self.text.length;
         if (wordCount > [self.limitLength integerValue]) {
             wordCount = [self.limitLength integerValue];
         }
         self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
         
     }
+
+}
+
+- (void)dealloc {
     
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UITextViewTextDidChangeNotification
+                                                  object:self];
+
 }
 
 
