@@ -11,8 +11,10 @@
   ```Objective-C
     //实例化你的textView
     //两个属性可分别使用，互不影响
-    textView.placeholder = @"我是一个占位符";//占位符
-    textView.limitLength = @15;//字数限制
+//    textView.text = @"请写在自定义属性前面，如果长度大于limitLength设置长度会被自动截断。";
+    textView.placeholder = @"欢迎star";
+    textView.limitLength = @20;
+    [self.view addSubview:textView];
 
   ```
 ##效果
