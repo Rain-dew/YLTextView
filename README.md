@@ -5,7 +5,7 @@
 *第一步
   把YLTextView文件夹拖入你的项目
 ```Objective-C
-#include "UITextView+YLTextView.h"
+#import "UITextView+YLTextView.h"
 ```
   *第二步
   ```Objective-C
