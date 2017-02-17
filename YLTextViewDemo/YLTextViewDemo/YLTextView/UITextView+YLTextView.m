@@ -26,30 +26,6 @@ static NSString *PLACEHOLD = @"placehold";
 static NSString *WORDCOUNTLABEL = @"wordcount";
 static const void *limitLengthKey = &limitLengthKey;
 
-+ (void)load {
-    
-    //方法交换     避免初始text直接赋值导致place同时存在的情况
-    
-    //获取类方法
-    Method setText = class_getInstanceMethod([UITextView class], @selector(setText:));
-    //获取实例方法
-    Method yl_setText = class_getInstanceMethod([UITextView class], @selector(yl_setText:));
-    method_exchangeImplementations(setText, yl_setText);
-    
-    
-
-    
-    
-}
-- (NSString *)yl_setText:(NSString *)text {
-    
-    UITextView *yl_text = self;
-    [yl_text yl_setText:text];
-    if (text.length > 0) {
-        self.placeholderLabel.hidden = YES;
-    }
-    return yl_text.text;
-}
 
 #pragma mark -- set/get...
 
@@ -65,7 +41,8 @@ static const void *limitLengthKey = &limitLengthKey;
 }
 
 - (void)setPlaceholder:(NSString *)placeholder {
-
+    
+   
     objc_setAssociatedObject(self, &PLACEHOLD, placeholder, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self setPlaceHolderLabel:placeholder];
 }
@@ -104,7 +81,7 @@ static const void *limitLengthKey = &limitLengthKey;
 #pragma mark -- 配置占位符标签
 
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
-
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldChanged:) name:UITextViewTextDidChangeNotification object:self];
     /*
      *  占位字符
@@ -118,6 +95,7 @@ static const void *limitLengthKey = &limitLengthKey;
     CGRect rect = [placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:13.]} context:nil];
     self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
     [self addSubview:self.placeholderLabel];
+    self.placeholderLabel.hidden = self.text.length > 0 ? YES : NO;
 
 }
 
@@ -132,8 +110,12 @@ static const void *limitLengthKey = &limitLengthKey;
     self.wordCountLabel.textAlignment = NSTextAlignmentRight;
     self.wordCountLabel.textColor = [UIColor lightGrayColor];
     self.wordCountLabel.font = [UIFont systemFontOfSize:13.];
-    self.wordCountLabel.text = [NSString stringWithFormat:@"0/%@",limitLength];
+    if (self.text.length > [limitLength integerValue]) {
+        self.text = [self.text substringToIndex:[self.limitLength intValue]];
+    }
+    self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,limitLength];
     [self addSubview:self.wordCountLabel];
+    
 }
 
 
@@ -171,7 +153,6 @@ static const void *limitLengthKey = &limitLengthKey;
             wordCount = [self.limitLength integerValue];
         }
         self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
-        
     }
 
 }
@@ -181,7 +162,6 @@ static const void *limitLengthKey = &limitLengthKey;
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UITextViewTextDidChangeNotification
                                                   object:self];
-
 }
 
 
