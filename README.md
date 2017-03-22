@@ -17,5 +17,11 @@
     [self.view addSubview:textView];
 
   ```
+  备注：
+  如果你发现placeholder的位置出现在中间了，那么你加入下面代吗即可
+  ```Objective-C
+      self.automaticallyAdjustsScrollViewInsets = NO;
+  ```
+
 ##效果
 ![image] (https://github.com/Rain-dew/YLTextView/blob/master/YLTextViewDemo/%E3%80%82.gif)
