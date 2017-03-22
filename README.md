@@ -1,13 +1,13 @@
 # YLTextView
 一行代码搞定textView占位符和字数限制
 # YLTextView
-##如何使用？
-*第一步
+如何使用？
+第一步
   把YLTextView文件夹拖入你的项目
 ```Objective-C
 #import "UITextView+YLTextView.h"
 ```
-  *第二步
+ 第二步
   ```Objective-C
     //实例化你的textView
     //两个属性可分别使用，互不影响
@@ -17,12 +17,12 @@
     [self.view addSubview:textView];
 
   ```
-  备注：
-  如果你发现placeholder的位置出现在中间了，那么你加入下面代吗即可
-  ```Objective-C
-      self.automaticallyAdjustsScrollViewInsets = NO;
-  ```
+备注：
+如果你发现placeholder的位置出现在中间了，那么你加入下面代吗即可
+```Objective-C
+   self.automaticallyAdjustsScrollViewInsets = NO;
+```
 
-##效果
+效果
 
 ![image] (https://github.com/Rain-dew/YLTextView/blob/master/YLTextViewDemo/%E3%80%82.gif)
