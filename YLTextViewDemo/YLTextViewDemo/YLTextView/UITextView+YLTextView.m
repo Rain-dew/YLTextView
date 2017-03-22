@@ -96,6 +96,7 @@ static const void *limitLengthKey = &limitLengthKey;
     self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
     [self addSubview:self.placeholderLabel];
     self.placeholderLabel.hidden = self.text.length > 0 ? YES : NO;
+    self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,self.limitLength];
 
 }
 
