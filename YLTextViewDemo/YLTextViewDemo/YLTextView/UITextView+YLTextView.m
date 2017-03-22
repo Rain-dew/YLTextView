@@ -83,6 +83,9 @@ static const void *limitLengthKey = &limitLengthKey;
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldChanged:) name:UITextViewTextDidChangeNotification object:self];
+     if (self.placeholderLabel) {
+        [self.placeholderLabel removeFromSuperview];
+    }
     /*
      *  占位字符
      */
@@ -103,7 +106,9 @@ static const void *limitLengthKey = &limitLengthKey;
 #pragma mark -- 配置字数限制标签
 
 - (void)setWordcountLable:(NSNumber *)limitLength {
-    
+    if (self.wordCountLabel) {
+        [self.wordCountLabel removeFromSuperview];
+    }
     /*
      *  字数限制
      */
