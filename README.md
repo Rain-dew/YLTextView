@@ -1,6 +1,6 @@
 # YLTextView
 一行代码搞定textView占位符和字数限制
-# YLTextView
+# YLTextView   ## Swift版本说明在下面
 如何使用？
 第一步
   把YLTextView文件夹拖入你的项目
@@ -21,6 +21,18 @@
 如果你发现placeholder的位置出现在中间了，那么你加入下面代吗即可
 ```Objective-C
    self.automaticallyAdjustsScrollViewInsets = NO;
+```
+
+## Swift版本
+下载后找到 #### YLTextView_SwitDemo 打开运行项目。
+```Swift
+        let textview = UITextView(frame: CGRect(x: 100, y: 100, width: 200, height: 150))
+//        textview.text = "如果你想对textView.text直接赋值。请在设置属性之前进行，否则影响计算"
+        textview.placeholder = "喜欢请Star"
+        textview.limitLength = 20
+        textview.center = self.view.center
+        view.addSubview(textview)
+
 ```
 
 效果
