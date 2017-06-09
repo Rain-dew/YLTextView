@@ -24,7 +24,8 @@
 ```
 
 ## Swift版本
-下载后找到 #### YLTextView_SwitDemo 打开运行项目。
+#### YLTextView_SwitDemo 
+下载后找到上面文件夹，打开运行项目。
 ```Swift
         let textview = UITextView(frame: CGRect(x: 100, y: 100, width: 200, height: 150))
 //        textview.text = "如果你想对textView.text直接赋值。请在设置属性之前进行，否则影响计算"
