@@ -1,6 +1,6 @@
 # YLTextView
 一行代码搞定textView占位符和字数限制
-# YLTextView   ## Swift版本说明在下面
+# OC版本
 如何使用？
 第一步
   把YLTextView文件夹拖入你的项目
