@@ -25,65 +25,71 @@ static NSString *PLACEHOLDLABEL = @"placelabel";
 static NSString *PLACEHOLD = @"placehold";
 static NSString *WORDCOUNTLABEL = @"wordcount";
 static const void *limitLengthKey = &limitLengthKey;
+static const void *limitLinesKey = &limitLinesKey;
 
 
 #pragma mark -- set/get...
 
 -(void)setPlaceholderLabel:(UILabel *)placeholderLabel {
-
+    
     objc_setAssociatedObject(self, &PLACEHOLDLABEL, placeholderLabel, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UILabel *)placeholderLabel {
-
+    
     return objc_getAssociatedObject(self, &PLACEHOLDLABEL);
-
+    
 }
 
 - (void)setPlaceholder:(NSString *)placeholder {
     
-   
+    
     objc_setAssociatedObject(self, &PLACEHOLD, placeholder, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self setPlaceHolderLabel:placeholder];
 }
 
 - (NSString *)placeholder {
-
+    
     return objc_getAssociatedObject(self, &PLACEHOLD);
 }
 
 
 - (UILabel *)wordCountLabel {
-
+    
     return objc_getAssociatedObject(self, &WORDCOUNTLABEL);
-
+    
 }
 - (void)setWordCountLabel:(UILabel *)wordCountLabel {
-
+    
     objc_setAssociatedObject(self, &WORDCOUNTLABEL, wordCountLabel, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-
+    
 }
 
-
 - (NSNumber *)limitLength {
-
+    
     return objc_getAssociatedObject(self, limitLengthKey);
 }
 
 - (void)setLimitLength:(NSNumber *)limitLength {
     objc_setAssociatedObject(self, limitLengthKey, limitLength, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [self addLimitLengthObserver:[limitLength intValue]];
-
     [self setWordcountLable:limitLength];
     
+}
+- (NSNumber *)limitLines {
+    return objc_getAssociatedObject(self, limitLinesKey);
+}
+- (void)setLimitLines:(NSNumber *)limitLines {
+    objc_setAssociatedObject(self, limitLinesKey, limitLines, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    [self addLimitLengthObserver:[limitLines intValue]];
 }
 
 #pragma mark -- 配置占位符标签
 
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textFieldChanged:) name:UITextViewTextDidChangeNotification object:self];
-     if (self.placeholderLabel) {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
+    if (self.placeholderLabel) {
         [self.placeholderLabel removeFromSuperview];
     }
     /*
@@ -100,7 +106,7 @@ static const void *limitLengthKey = &limitLengthKey;
     [self addSubview:self.placeholderLabel];
     self.placeholderLabel.hidden = self.text.length > 0 ? YES : NO;
     self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,self.limitLength];
-
+    
 }
 
 #pragma mark -- 配置字数限制标签
@@ -124,26 +130,35 @@ static const void *limitLengthKey = &limitLengthKey;
     
 }
 
-
 #pragma mark -- 增加限制位数的通知
 - (void)addLimitLengthObserver:(int)length {
-
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(limitLengthEvent) name:UITextViewTextDidChangeNotification object:self];
 }
 
 #pragma mark -- 限制输入的位数
 - (void)limitLengthEvent {
-
-    if ([self.text length] > [self.limitLength intValue]) {
-
-        self.text = [self.text substringToIndex:[self.limitLength intValue]];
+    
+    if (self.limitLength) {//字数限制
+        if ([self.text length] > [self.limitLength intValue]) {
+            self.text = [self.text substringToIndex:[self.limitLength intValue]];
+            NSLog(@"Maximum number of words");
+        }
+    }else {
+        if (self.limitLines) {//行数限制
+            CGSize size_single = [self getStringPlaceSize:@"我" textFont:self.font bundingSize:CGSizeMake(30, 20)];
+            CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
+            if (size.height > size_single.height * [self.limitLines intValue]) {
+                self.text = [self.text substringToIndex:self.text.length - 1];
+                NSLog(@"Maximum number of lines");
+            }
+        }
     }
+    
 }
-
 
 #pragma mark -- NSNotification
 
-- (void)textFieldChanged:(NSNotification *)notification {
+- (void)textViewChanged:(NSNotification *)notification {
     if (self.placeholder) {
         self.placeholderLabel.hidden = YES;
         
@@ -160,11 +175,18 @@ static const void *limitLengthKey = &limitLengthKey;
         }
         self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
     }
+    
+}
 
+- (CGSize)getStringPlaceSize:(NSString *)string textFont:(UIFont *)font bundingSize:(CGSize)boundSize {
+    ///计算文本高度
+    NSDictionary *attribute = @{NSFontAttributeName:font};
+    NSStringDrawingOptions option = (NSStringDrawingOptions)(NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading);
+    CGSize size = [string boundingRectWithSize:boundSize options:option attributes:attribute context:nil].size;
+    return size;
 }
 
 - (void)dealloc {
-    
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:UITextViewTextDidChangeNotification
                                                   object:self];

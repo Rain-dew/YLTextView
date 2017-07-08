@@ -25,6 +25,7 @@
 //    textView.text = @"请写在自定义属性前面，如果长度大于limitLength设置长度会被自动截断。";
     textView.placeholder = @"欢迎star";
     textView.limitLength = @20;
+    //    textView.limitLines = @4;//行数限制优先级低于字数限制
     [self.view addSubview:textView];
     
 }
