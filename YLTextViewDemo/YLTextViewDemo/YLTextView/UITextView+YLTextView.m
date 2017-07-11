@@ -145,9 +145,8 @@ static const void *limitLinesKey = &limitLinesKey;
         }
     }else {
         if (self.limitLines) {//行数限制
-            CGSize size_single = [self getStringPlaceSize:@"我" textFont:self.font bundingSize:CGSizeMake(30, 20)];
             CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
-            if (size.height > size_single.height * [self.limitLines intValue]) {
+            if (size.height > self.font.lineHeight * [self.limitLines intValue]) {
                 self.text = [self.text substringToIndex:self.text.length - 1];
                 NSLog(@"Maximum number of lines");
             }

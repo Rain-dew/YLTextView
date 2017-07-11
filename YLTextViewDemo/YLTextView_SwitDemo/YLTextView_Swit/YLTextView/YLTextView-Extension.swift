@@ -15,6 +15,7 @@ extension UITextView {
     fileprivate struct RuntimeKey {
         static let placeholder = UnsafeRawPointer.init(bitPattern: "PLACEHOLDEL".hashValue)
         static let limitLength = UnsafeRawPointer.init(bitPattern: "LIMITLENGTH".hashValue)
+        static let limitLines = UnsafeRawPointer.init(bitPattern: "LIMITLINES".hashValue)
         static let placeholderLabel = UnsafeRawPointer.init(bitPattern: "PLACEHOLDELABEL".hashValue)
         static let wordCountLabel = UnsafeRawPointer.init(bitPattern: "WORDCOUNTLABEL".hashValue)
         // ...其他Key声明
@@ -22,7 +23,7 @@ extension UITextView {
     /*
      *  使用runtime添加属性
      */
-    var placeholder: String? {
+    var placeholder: String? {//占位符
         set {
             objc_setAssociatedObject(self, UITextView.RuntimeKey.placeholder, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
             initPlaceholder(placeholder!)
@@ -31,13 +32,22 @@ extension UITextView {
             return  objc_getAssociatedObject(self, UITextView.RuntimeKey.placeholder) as? String
         }
     }
-    var limitLength: NSNumber? {
+    var limitLength: NSNumber? {//限制的字数
         set {
             objc_setAssociatedObject(self, UITextView.RuntimeKey.limitLength, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
             initWordCountLabel(limitLength!)
         }
         get {
             return  objc_getAssociatedObject(self, UITextView.RuntimeKey.limitLength) as? NSNumber
+        }
+    }
+    var limitLines: NSNumber? {//限制的行数
+        set {
+            objc_setAssociatedObject(self, UITextView.RuntimeKey.limitLines, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+            NotificationCenter.default.addObserver(self, selector: #selector(limitLengthEvent), name: .UITextViewTextDidChange, object: self)
+        }
+        get {
+            return  objc_getAssociatedObject(self, UITextView.RuntimeKey.limitLines) as? NSNumber
         }
     }
     var placeholderLabel: UILabel? {
@@ -117,10 +127,29 @@ extension UITextView {
     }
 
     @objc fileprivate func limitLengthEvent() {
-
-        if self.text.characters.count > (limitLength?.intValue)! && limitLength != nil {
-            self.text = (self.text as NSString).substring(to: (limitLength?.intValue)!)
+        if limitLength != nil {
+            if self.text.characters.count > (limitLength?.intValue)! && limitLength != nil {
+                self.text = (self.text as NSString).substring(to: (limitLength?.intValue)!)
+                print("Maximum number of words");
+            }
+        }else {
+            if (limitLines != nil) {//行数限制
+                let size = getStringPlaceSize(self.text, textFont: self.font!)
+                let height = self.font!.lineHeight * CGFloat(limitLines!.floatValue)
+                if (size.height > height) {
+                    self.text = (self.text as NSString).substring(to: self.text.characters.count - 1)
+                    print("Maximum number of lines");
+                }
+            }
         }
+    }
+    
+    @objc fileprivate func getStringPlaceSize(_ string : String, textFont : UIFont) -> CGSize {
+        ///计算文本高度
+        let attribute = [NSFontAttributeName : textFont];
+        let options = NSStringDrawingOptions.usesLineFragmentOrigin
+        let size = string.boundingRect(with: CGSize(width: self.contentSize.width-10, height: CGFloat.greatestFiniteMagnitude), options: options, attributes: attribute, context: nil).size
+        return size
     }
     //MARK: 不支持   fuck!
 //    deinit {
