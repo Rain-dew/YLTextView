@@ -21,7 +21,11 @@
 备注：
 如果你发现placeholder的位置出现在中间了，那么你加入下面代吗即可
 ```Objective-C
-   self.automaticallyAdjustsScrollViewInsets = NO;
+ if (@available(iOS 11.0, *)) {
+        self.tableView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    } else {
+       self.automaticallyAdjustsScrollViewInsets = NO;
+    }
 ```
 
 ## Swift版本
