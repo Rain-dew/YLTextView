@@ -91,6 +91,9 @@ extension UITextView {
     fileprivate func initWordCountLabel(_ limitLength : NSNumber) {
         
         NotificationCenter.default.addObserver(self, selector: #selector(limitLengthEvent), name: .UITextViewTextDidChange, object: self)
+         if wordCountLabel != nil {
+            wordCountLabel?.removeFromSuperview()
+        }
         wordCountLabel = UILabel(frame: CGRect(x: self.frame.size.width - 65, y: self.frame.size.height - 20, width: 60, height: 20))
         let font = UIFont.systemFont(ofSize: 13)
         wordCountLabel?.textAlignment = .right
@@ -157,7 +160,16 @@ extension UITextView {
 //
 //    }
 //    
-    
+    override open func layoutSubviews() {
+        super.layoutSubviews()
+        if limitLength != nil && wordCountLabel != nil {
+            /*
+             *  避免外部使用了约束 这里再次更新frame
+             */
+            wordCountLabel!.frame = CGRect(x: frame.width - 65, y: frame.height - 20, width: 60, height: 20)
+        }
+    }
+
 }
 
 
