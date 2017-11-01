@@ -168,6 +168,10 @@ extension UITextView {
              */
             wordCountLabel!.frame = CGRect(x: frame.width - 65, y: frame.height - 20, width: 60, height: 20)
         }
+        if placeholder != nil && placeholderLabel != nil {
+            let rect: CGRect = placeholder!.boundingRect(with: CGSize(width: frame.width - 7, height: CGFloat.greatestFiniteMagnitude), options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 13.0)], context: nil)
+            placeholderLabel!.frame = CGRect(x: 7, y: 7, width: rect.size.width, height: rect.size.height)
+        }
     }
 
 }
