@@ -198,6 +198,10 @@ static const void *limitLinesKey = &limitLinesKey;
          */
         self.wordCountLabel.frame = CGRectMake(CGRectGetWidth(self.frame) - 65, CGRectGetHeight(self.frame) - 20, 60, 20);
     }
+    if (self.placeholder && self.placeholderLabel) {
+        CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:13.]} context:nil];
+        self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
+    }
 }
 
 @end
