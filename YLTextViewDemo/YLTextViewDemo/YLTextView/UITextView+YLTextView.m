@@ -190,6 +190,14 @@ static const void *limitLinesKey = &limitLinesKey;
                                                     name:UITextViewTextDidChangeNotification
                                                   object:self];
 }
-
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    if (self.limitLength && self.wordCountLabel) {
+        /*
+         *  避免外部使用了约束 这里再次更新frame
+         */
+        self.wordCountLabel.frame = CGRectMake(CGRectGetWidth(self.frame) - 65, CGRectGetHeight(self.frame) - 20, 60, 20);
+    }
+}
 
 @end
