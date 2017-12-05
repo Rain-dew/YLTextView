@@ -32,7 +32,6 @@ static NSString *PLACEHOLDCOLOR = @"placeholdcolor";
 static NSString *LIMITCOLOR = @"limitcolor";
 static NSString *AUTOHEIGHT = @"autoheight";
 static NSString *OLDFRAME = @"oldframe";
-
 static const void *limitLengthKey = &limitLengthKey;
 static const void *limitLinesKey = &limitLinesKey;
 
