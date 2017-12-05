@@ -263,7 +263,7 @@ static const void *limitLinesKey = &limitLinesKey;
         CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
         self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
     }
-    if (self.autoHeight) {
+    if ([self.autoHeight isEqual:@1]) {
         CGRect currentFrame = self.frame;
         self.oldFrame = [NSValue valueWithCGRect:currentFrame];
     }
