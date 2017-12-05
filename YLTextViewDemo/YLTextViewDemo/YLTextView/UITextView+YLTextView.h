@@ -31,6 +31,8 @@
 
 @property(nonatomic, strong) UIColor  *limitPlaceColor;//行数、字数限制文字颜色 默认灰色
 
+@property(nonatomic,   copy) NSNumber *autoHeight;//自动高度 默认不计算 设置@1自动计算高度
+
 /* ******特殊说明。如果你想对textView.text直接赋值*******
  *       请务必在对placehoulder和limitLength之前进行
  *       一旦你对text赋值了，你需要立马重新对placeholder赋值。
