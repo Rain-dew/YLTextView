@@ -17,7 +17,8 @@
     textView.limitPlaceColor = [UIColor redColor];
     textView.placeholdFont = [UIFont systemFontOfSize:17];
     textView.limitPlaceFont = [UIFont systemFontOfSize:17];
-    //    textView.limitLines = @4;//行数限制优先级低于字数限制
+    textView.autoHeight = @1;//自动计算高度 若取消不设置或 @0 即可
+    //  textView.limitLines = @4;//行数限制优先级低于字数限制
     [self.view addSubview:textView];
 
   ```
