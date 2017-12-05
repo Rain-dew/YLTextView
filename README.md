@@ -39,6 +39,10 @@
 //        textview.text = "如果你想对textView.text直接赋值。请在设置属性之前进行，否则影响计算"
         textview.placeholder = "喜欢请Star"
         textview.limitLength = 20
+        textview.placeholdColor = .red
+        textview.limitLabelColor = .red
+        textview.placeholdFont = UIFont.boldSystemFont(ofSize: 17)
+        textview.limitLabelFont = UIFont.boldSystemFont(ofSize: 17)
 //        textview.limitLines = 4;
         textview.center = self.view.center
         view.addSubview(textview)
