@@ -22,9 +22,15 @@
     UITextView *textView = [[UITextView alloc] init];
     textView.frame = CGRectMake(0, 0, 200, 150);
     textView.center = self.view.center;
+//    textView.font = [UIFont systemFontOfSize:17];
+    
 //    textView.text = @"请写在自定义属性前面，如果长度大于limitLength设置长度会被自动截断。";
-    textView.placeholder = @"欢迎star";
+    textView.placeholder = @"欢迎starsf";
     textView.limitLength = @20;
+    textView.placeholdColor = [UIColor redColor];
+    textView.limitPlaceColor = [UIColor redColor];
+    textView.placeholdFont = [UIFont systemFontOfSize:17];
+    textView.limitPlaceFont = [UIFont systemFontOfSize:17];
     //    textView.limitLines = @4;//行数限制优先级低于字数限制
     [self.view addSubview:textView];
     
