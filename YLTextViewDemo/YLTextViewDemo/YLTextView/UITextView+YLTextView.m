@@ -18,6 +18,8 @@
 @interface UITextView ()
 @property (nonatomic,strong) UILabel *placeholderLabel;//占位符
 @property (nonatomic,strong) UILabel *wordCountLabel;//计算字数
+@property (nonatomic,strong) NSValue *oldFrame;//记录初始frame
+
 @end
 @implementation UITextView (YLTextView)
 
@@ -28,6 +30,9 @@ static NSString *PLACEHOLDFONT = @"placeholdfont";
 static NSString *LIMITFONT = @"limitfont";
 static NSString *PLACEHOLDCOLOR = @"placeholdcolor";
 static NSString *LIMITCOLOR = @"limitcolor";
+static NSString *AUTOHEIGHT = @"autoheight";
+static NSString *OLDFRAME = @"oldframe";
+
 static const void *limitLengthKey = &limitLengthKey;
 static const void *limitLinesKey = &limitLinesKey;
 
@@ -121,6 +126,22 @@ static const void *limitLinesKey = &limitLinesKey;
     return objc_getAssociatedObject(self, &LIMITCOLOR) == nil ? [UIColor lightGrayColor] : objc_getAssociatedObject(self, &LIMITCOLOR);
 }
 
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- (void)setAutoHeight:(NSNumber *)autoHeight {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
+    objc_setAssociatedObject(self, &AUTOHEIGHT, autoHeight, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+- (NSNumber *)autoHeight {
+    return objc_getAssociatedObject(self, &AUTOHEIGHT);
+}
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- (void)setOldFrame:(NSValue *)oldFrame {
+    objc_setAssociatedObject(self, &OLDFRAME, oldFrame, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+- (NSValue *)oldFrame {
+    return objc_getAssociatedObject(self, &OLDFRAME);
+}
 #pragma mark -- 配置占位符标签
 
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
@@ -155,7 +176,7 @@ static const void *limitLinesKey = &limitLinesKey;
     /*
      *  字数限制
      */
-    self.wordCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.frame) - 65, CGRectGetHeight(self.frame) - 20, 60, 20)];
+    self.wordCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 10, 20)];
     self.wordCountLabel.textAlignment = NSTextAlignmentRight;
     self.wordCountLabel.textColor = self.limitPlaceColor;
     self.wordCountLabel.font = self.limitPlaceFont;
@@ -197,19 +218,23 @@ static const void *limitLinesKey = &limitLinesKey;
 - (void)textViewChanged:(NSNotification *)notification {
     if (self.placeholder) {
         self.placeholderLabel.hidden = YES;
-        
         if (self.text.length == 0) {
-            
             self.placeholderLabel.hidden = NO;
         }
     }
     if (self.limitLength) {
-        
         NSInteger wordCount = self.text.length;
         if (wordCount > [self.limitLength integerValue]) {
             wordCount = [self.limitLength integerValue];
         }
         self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
+    }
+    if (self.autoHeight) {
+        CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(CGRectGetWidth(self.frame), MAXFLOAT)];
+        CGRect oldRect = self.oldFrame.CGRectValue;
+        [UIView animateWithDuration:0.15 animations:^{
+            self.frame = CGRectMake(oldRect.origin.x, oldRect.origin.y, oldRect.size.width, size.height + 25 <= oldRect.size.height ? oldRect.size.height : size.height + 25);
+        }];
     }
     
 }
@@ -233,12 +258,17 @@ static const void *limitLinesKey = &limitLinesKey;
         /*
          *  避免外部使用了约束 这里再次更新frame
          */
-        self.wordCountLabel.frame = CGRectMake(CGRectGetWidth(self.frame) - 65, CGRectGetHeight(self.frame) - 20, 60, 20);
+        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 10, 20);
     }
     if (self.placeholder && self.placeholderLabel) {
         CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
         self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
     }
+    if (self.autoHeight) {
+        CGRect currentFrame = self.frame;
+        self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+    }
+    
 }
 
 @end
