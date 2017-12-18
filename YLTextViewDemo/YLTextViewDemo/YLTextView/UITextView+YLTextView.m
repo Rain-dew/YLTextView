@@ -194,11 +194,22 @@ static const void *limitLinesKey = &limitLinesKey;
 
 #pragma mark -- 限制输入的位数
 - (void)limitLengthEvent {
-    
+ 
     if (self.limitLength) {//字数限制
-        if ([self.text length] > [self.limitLength intValue]) {
-            self.text = [self.text substringToIndex:[self.limitLength intValue]];
-            NSLog(@"Maximum number of words");
+        NSString *keyboardType = self.textInputMode.primaryLanguage;
+        if ([keyboardType isEqualToString:@"zh-Hans"]) {//对简体中文做特殊处理>>>>高亮拼写问题
+            UITextRange *range = [self markedTextRange];
+            if (!range) {
+                if (self.text.length > [self.limitLength intValue]) {
+                    self.text = [self.text substringToIndex:[self.limitLength intValue]];
+                    NSLog(@"Maximum number of words");
+                }else {/*有高亮不做限制*/}
+            }
+        }else {
+            if ([self.text length] > [self.limitLength intValue]) {
+                self.text = [self.text substringToIndex:[self.limitLength intValue]];
+                NSLog(@"Maximum number of words");
+            }
         }
     }else {
         if (self.limitLines) {//行数限制
@@ -211,6 +222,7 @@ static const void *limitLinesKey = &limitLinesKey;
     }
     
 }
+
 
 #pragma mark -- NSNotification
 
