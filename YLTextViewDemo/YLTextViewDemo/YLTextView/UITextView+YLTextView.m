@@ -211,6 +211,7 @@ static const void *limitLinesKey = &limitLinesKey;
                 NSLog(@"Maximum number of words");
             }
         }
+        self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,self.limitLength];
     }else {
         if (self.limitLines) {//行数限制
             CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
@@ -218,6 +219,7 @@ static const void *limitLinesKey = &limitLinesKey;
                 self.text = [self.text substringToIndex:self.text.length - 1];
                 NSLog(@"Maximum number of lines");
             }
+            self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,self.limitLines];
         }
     }
     
