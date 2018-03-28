@@ -35,7 +35,6 @@ static NSString *OLDFRAME = @"oldframe";
 static const void *limitLengthKey = &limitLengthKey;
 static const void *limitLinesKey = &limitLinesKey;
 
-
 #pragma mark -- set/get...
 
 - (void)setPlaceholderLabel:(UILabel *)placeholderLabel {
@@ -238,16 +237,16 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 
 - (CGSize)getStringPlaceSize:(NSString *)string textFont:(UIFont *)font bundingSize:(CGSize)boundSize {
-    ///计算文本高度
+    //计算文本高度
     NSDictionary *attribute = @{NSFontAttributeName:font};
     NSStringDrawingOptions option = (NSStringDrawingOptions)(NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading);
     CGSize size = [string boundingRectWithSize:boundSize options:option attributes:attribute context:nil].size;
     return size;
 }
 
-- (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
-}
+//- (void)dealloc {
+//    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
+//}
 - (void)layoutSubviews {
     [super layoutSubviews];
     if (self.limitLength && self.wordCountLabel) {
@@ -264,7 +263,6 @@ static const void *limitLinesKey = &limitLinesKey;
         CGRect currentFrame = self.frame;
         self.oldFrame = [NSValue valueWithCGRect:currentFrame];
     }
-    
 }
 
 @end
