@@ -184,12 +184,14 @@ static const void *limitLinesKey = &limitLinesKey;
     self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,limitLength];
     [self addSubview:self.wordCountLabel];
     
+    self.contentInset = UIEdgeInsetsMake(0, 0, 20, 0);
 }
 
 #pragma mark -- NSNotification
 
 - (void)textViewChanged:(NSNotification *)notification {
     NSInteger wordCount = self.text.length;
+    
     if (self.placeholder) {
         self.placeholderLabel.hidden = YES;
         if (wordCount == 0) {
@@ -215,7 +217,7 @@ static const void *limitLinesKey = &limitLinesKey;
                 NSLog(@"已经是最大字数");
             }
         }
-        self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
+        self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",(long)wordCount,self.limitLength];
     }else {
         if (self.limitLines) {//行数限制
             CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
@@ -244,16 +246,16 @@ static const void *limitLinesKey = &limitLinesKey;
     return size;
 }
 
-//- (void)dealloc {
-//    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
-//}
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
+}
 - (void)layoutSubviews {
     [super layoutSubviews];
     if (self.limitLength && self.wordCountLabel) {
         /*
          *  避免外部使用了约束 这里再次更新frame
          */
-        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 10, 20);
+        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 10, 20);
     }
     if (self.placeholder && self.placeholderLabel) {
         CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
