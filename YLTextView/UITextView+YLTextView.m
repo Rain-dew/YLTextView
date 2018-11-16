@@ -35,7 +35,6 @@ static NSString *OLDFRAME = @"oldframe";
 static const void *limitLengthKey = &limitLengthKey;
 static const void *limitLinesKey = &limitLinesKey;
 
-
 #pragma mark -- set/get...
 
 - (void)setPlaceholderLabel:(UILabel *)placeholderLabel {
@@ -68,7 +67,7 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 - (void)setLimitLength:(NSNumber *)limitLength {
     objc_setAssociatedObject(self, limitLengthKey, limitLength, OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [self addLimitLengthObserver:[limitLength intValue]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
     [self setWordcountLable:limitLength];
 }
 
@@ -78,7 +77,7 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 - (void)setLimitLines:(NSNumber *)limitLines {
     objc_setAssociatedObject(self, limitLinesKey, limitLines, OBJC_ASSOCIATION_COPY_NONATOMIC);
-    [self addLimitLengthObserver:[limitLines intValue]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -185,60 +184,49 @@ static const void *limitLinesKey = &limitLinesKey;
     self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,limitLength];
     [self addSubview:self.wordCountLabel];
     
+    self.contentInset = UIEdgeInsetsMake(0, 0, 20, 0);
 }
 
-#pragma mark -- 增加限制位数的通知
-- (void)addLimitLengthObserver:(int)length {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(limitLengthEvent) name:UITextViewTextDidChangeNotification object:self];
-}
+#pragma mark -- NSNotification
 
-#pragma mark -- 限制输入的位数
-- (void)limitLengthEvent {
+- (void)textViewChanged:(NSNotification *)notification {
+    NSInteger wordCount = self.text.length;
     
-   if (self.limitLength) {//字数限制
+    if (self.placeholder) {
+        self.placeholderLabel.hidden = YES;
+        if (wordCount == 0) {
+            self.placeholderLabel.hidden = NO;
+        }
+    }
+    if (self.limitLength) {//字数限制
+        if (wordCount > [self.limitLength integerValue]) {
+            wordCount = [self.limitLength integerValue];
+        }
         NSString *keyboardType = self.textInputMode.primaryLanguage;
         if ([keyboardType isEqualToString:@"zh-Hans"]) {//对简体中文做特殊处理>>>>高亮拼写问题
             UITextRange *range = [self markedTextRange];
             if (!range) {
                 if (self.text.length > [self.limitLength intValue]) {
                     self.text = [self.text substringToIndex:[self.limitLength intValue]];
-                    NSLog(@"Maximum number of words");
+                    NSLog(@"已经是最大字数");
                 }else {/*有高亮不做限制*/}
             }
         }else {
             if ([self.text length] > [self.limitLength intValue]) {
                 self.text = [self.text substringToIndex:[self.limitLength intValue]];
-                NSLog(@"Maximum number of words");
+                NSLog(@"已经是最大字数");
             }
         }
+        self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",(long)wordCount,self.limitLength];
     }else {
         if (self.limitLines) {//行数限制
             CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
             if (size.height > self.font.lineHeight * [self.limitLines intValue]) {
                 self.text = [self.text substringToIndex:self.text.length - 1];
-                NSLog(@"Maximum number of lines");
+                NSLog(@"已经是最大行数/n行数限制，没有做右下角label提示,若有此需求,联系我");
             }
+            /*行数的限制，没有做右下角提示*/
         }
-    }
-    
-    
-}
-
-#pragma mark -- NSNotification
-
-- (void)textViewChanged:(NSNotification *)notification {
-    if (self.placeholder) {
-        self.placeholderLabel.hidden = YES;
-        if (self.text.length == 0) {
-            self.placeholderLabel.hidden = NO;
-        }
-    }
-    if (self.limitLength) {
-        NSInteger wordCount = self.text.length;
-        if (wordCount > [self.limitLength integerValue]) {
-            wordCount = [self.limitLength integerValue];
-        }
-        self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",wordCount,self.limitLength];
     }
     if (self.autoHeight) {
         CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(CGRectGetWidth(self.frame), MAXFLOAT)];
@@ -251,7 +239,7 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 
 - (CGSize)getStringPlaceSize:(NSString *)string textFont:(UIFont *)font bundingSize:(CGSize)boundSize {
-    ///计算文本高度
+    //计算文本高度
     NSDictionary *attribute = @{NSFontAttributeName:font};
     NSStringDrawingOptions option = (NSStringDrawingOptions)(NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading);
     CGSize size = [string boundingRectWithSize:boundSize options:option attributes:attribute context:nil].size;
@@ -259,9 +247,7 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 
 - (void)dealloc {
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:UITextViewTextDidChangeNotification
-                                                  object:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
 }
 - (void)layoutSubviews {
     [super layoutSubviews];
@@ -269,7 +255,7 @@ static const void *limitLinesKey = &limitLinesKey;
         /*
          *  避免外部使用了约束 这里再次更新frame
          */
-        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 10, 20);
+        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 10, 20);
     }
     if (self.placeholder && self.placeholderLabel) {
         CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
@@ -278,8 +264,10 @@ static const void *limitLinesKey = &limitLinesKey;
     if ([self.autoHeight isEqual:@1]) {
         CGRect currentFrame = self.frame;
         self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+        self.scrollEnabled = NO;
+    }else {
+        self.scrollEnabled = YES;
     }
-    
 }
 
 @end
