@@ -22,6 +22,8 @@ extension UITextView {
         static let placeholdColor = UnsafeRawPointer.init(bitPattern: "PLACEHOLDCOLOR".hashValue)
         static let limitLabelFont = UnsafeRawPointer.init(bitPattern: "LIMITLABELFONT".hashValue)
         static let limitLabelColor = UnsafeRawPointer.init(bitPattern: "LIMITLABLECOLOR".hashValue)
+        static let autoHeight = UnsafeRawPointer.init(bitPattern: "AUTOHEIGHT".hashValue)
+        static let oldFrame = UnsafeRawPointer.init(bitPattern: "LODFRAME".hashValue)
 
         // ...其他Key声明
     }
@@ -117,6 +119,22 @@ extension UITextView {
             return  objc_getAssociatedObject(self, UITextView.RuntimeKey.limitLabelColor) as? UIColor == nil ? UIColor.lightGray : objc_getAssociatedObject(self, UITextView.RuntimeKey.limitLabelColor) as? UIColor
         }
     }
+    var oldFrame: CGRect? {
+        set {
+            objc_setAssociatedObject(self, UITextView.RuntimeKey.oldFrame, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+        get {
+            return  objc_getAssociatedObject(self, UITextView.RuntimeKey.oldFrame) as? CGRect
+        }
+    }
+    var autoHeight: Bool? {
+        set {
+            objc_setAssociatedObject(self, UITextView.RuntimeKey.autoHeight, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+        get {
+            return  objc_getAssociatedObject(self, UITextView.RuntimeKey.autoHeight) as? Bool
+        }
+    }
     /*
      *  占位符
      */
@@ -132,7 +150,7 @@ extension UITextView {
         let rect = placeholder.boundingRect(with: CGSize(width: self.frame.size.width - 14, height: CGFloat(MAXFLOAT)), options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName : self.placeholdFont!], context: nil)
         placeholderLabel?.frame = CGRect(x: 7, y: 7, width: rect.size.width, height: rect.size.height)
         addSubview(self.placeholderLabel!)
-        placeholderLabel?.isHidden = self.text.characters.count > 0 ? true : false
+        placeholderLabel?.isHidden = self.text.count > 0 ? true : false
     }
     
     /*
@@ -144,15 +162,17 @@ extension UITextView {
          if wordCountLabel != nil {
             wordCountLabel?.removeFromSuperview()
         }
-        wordCountLabel = UILabel(frame: CGRect(x: self.frame.size.width - 65, y: self.frame.size.height - 20, width: 60, height: 20))
+        wordCountLabel = UILabel(frame: CGRect(x: 0, y: self.frame.size.height - 20, width: self.frame.size.width - 10, height: 20))
         wordCountLabel?.textAlignment = .right
         wordCountLabel?.textColor = self.limitLabelColor
         wordCountLabel?.font = self.limitLabelFont
-        if self.text.characters.count > limitLength.intValue {
+        if self.text.count > limitLength.intValue {
             self.text = (self.text as NSString).substring(to: limitLength.intValue)
         }
-        wordCountLabel?.text = "\(self.text.characters.count)/\(limitLength)"
+        wordCountLabel?.text = "\(self.text.count)/\(limitLength)"
         addSubview(wordCountLabel!)
+        self.contentInset = UIEdgeInsetsMake(0, 0, 20, 0)
+
     }
     
     
@@ -163,24 +183,30 @@ extension UITextView {
 
         if placeholder != nil {
             placeholderLabel?.isHidden = true
-            if self.text.characters.count ==  0 {
+            if self.text.count ==  0 {
                 self.placeholderLabel?.isHidden = false
             }
         }
         if limitLength != nil {
-            var wordCount = self.text.characters.count
+            var wordCount = self.text.count
             if wordCount > (limitLength?.intValue)! {
                 wordCount = (limitLength?.intValue)!
             }
             let limit = limitLength!.stringValue
             wordCountLabel?.text = "\(wordCount)/\(limit)"
         }
+        if autoHeight == true && self.oldFrame != nil {
+            let size = getStringPlaceSize(self.text, textFont: self.font!)
+            UIView.animate(withDuration: 0.15) {
+                self.frame = CGRect.init(x: (self.oldFrame?.origin.x)!, y: (self.oldFrame?.origin.y)!, width: (self.oldFrame?.size.width)!, height: size.height + 25 <= (self.oldFrame?.size.height)! ? (self.oldFrame?.size.height)! : size.height + 25)
+            }
+        }
         
     }
 
     @objc fileprivate func limitLengthEvent() {
         if limitLength != nil {
-            if self.text.characters.count > (limitLength?.intValue)! && limitLength != nil {
+            if self.text.count > (limitLength?.intValue)! && limitLength != nil {
                 self.text = (self.text as NSString).substring(to: (limitLength?.intValue)!)
                 print("Maximum number of words");
             }
@@ -189,7 +215,7 @@ extension UITextView {
                 let size = getStringPlaceSize(self.text, textFont: self.font!)
                 let height = self.font!.lineHeight * CGFloat(limitLines!.floatValue)
                 if (size.height > height) {
-                    self.text = (self.text as NSString).substring(to: self.text.characters.count - 1)
+                    self.text = (self.text as NSString).substring(to: self.text.count - 1)
                     print("Maximum number of lines");
                 }
             }
@@ -203,7 +229,7 @@ extension UITextView {
         let size = string.boundingRect(with: CGSize(width: self.contentSize.width-10, height: CGFloat.greatestFiniteMagnitude), options: options, attributes: attribute, context: nil).size
         return size
     }
-    //MARK: 不支持   fuck!
+    //MARK: Swift分类竟然不支持
 //    deinit {
 //        NotificationCenter.default.removeObserver(self, name: .UITextViewTextDidChange, object: self)
 //
@@ -215,11 +241,17 @@ extension UITextView {
             /*
              *  避免外部使用了约束 这里再次更新frame
              */
-            wordCountLabel!.frame = CGRect(x: frame.width - 65, y: frame.height - 20, width: 60, height: 20)
+            wordCountLabel!.frame = CGRect(x: 0, y: frame.height - 20 + contentOffset.y, width: frame.width - 10, height: 20)
         }
         if placeholder != nil && placeholderLabel != nil {
             let rect: CGRect = placeholder!.boundingRect(with: CGSize(width: frame.width - 7, height: CGFloat.greatestFiniteMagnitude), options: .usesLineFragmentOrigin, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 13.0)], context: nil)
             placeholderLabel!.frame = CGRect(x: 7, y: 7, width: rect.size.width, height: rect.size.height)
+        }
+        if autoHeight == true {
+            self.oldFrame = self.frame
+            self.isScrollEnabled = false
+        }else {
+            self.isScrollEnabled = true
         }
     }
 
