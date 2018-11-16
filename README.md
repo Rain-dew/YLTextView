@@ -33,7 +33,7 @@
 ```
 
 ## Swift版本
-#### YLTextView_SwitDemo 
+#### YLTextView_SwiftDemo 
 下载后找到上面文件夹，打开运行项目。
 ```Swift
         let textview = UITextView(frame: CGRect(x: 100, y: 100, width: 200, height: 150))
