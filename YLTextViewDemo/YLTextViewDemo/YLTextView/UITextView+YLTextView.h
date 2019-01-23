@@ -15,6 +15,8 @@
 
 #import <UIKit/UIKit.h>
 
+typedef void(^textViewInfo)(NSString *text,CGSize textViewSize);
+
 @interface UITextView (YLTextView)
 
 @property (nonatomic,strong) NSString *placeholder;//占位符,可与下面属性任意一个同时设置
@@ -32,6 +34,8 @@
 @property(nonatomic, strong) UIColor  *limitPlaceColor;//行数、字数限制文字颜色 默认灰色
 
 @property(nonatomic,   copy) NSNumber *autoHeight;//自动高度 默认不计算 设置@1自动计算高度
+
+@property(nonatomic,   copy) textViewInfo infoBlock;//获取当前字数、当前高度的block
 
 /* ******特殊说明。如果你想对textView.text直接赋值*******
  *       请务必在对placehoulder和limitLength之前进行
