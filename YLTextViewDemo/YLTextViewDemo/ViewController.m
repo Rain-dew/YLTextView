@@ -22,16 +22,21 @@
     UITextView *textView = [[UITextView alloc] init];
     textView.frame = CGRectMake(0, 0, 200, 120);
     textView.center = self.view.center;
-//    textView.font = [UIFont systemFontOfSize:17];
+    textView.font = [UIFont systemFontOfSize:17];
     
 //    textView.text = @"请写在自定义属性前面，如果长度大于limitLength设置长度会被自动截断。";
     textView.placeholder = @"我是一个占位符";
-    textView.limitLength = @20;
+    textView.limitLength = @200;
     textView.placeholdColor = [UIColor redColor];
     textView.limitPlaceColor = [UIColor redColor];
-    textView.placeholdFont = [UIFont systemFontOfSize:14];
+    textView.placeholdFont = [UIFont systemFontOfSize:17];
     textView.limitPlaceFont = [UIFont systemFontOfSize:17];
-    //    textView.limitLines = @4;//行数限制优先级低于字数限制
+//    textView.autoHeight = @1;
+//    textView.limitLines = @4;//行数限制优先级低于字数限制
+    textView.infoBlock = ^(NSString *text, CGSize textViewSize) {
+        NSLog(@"当前文字: %@   当前高度:%lf",text,textViewSize.height);
+    };
+    
     [self.view addSubview:textView];
     
 }
