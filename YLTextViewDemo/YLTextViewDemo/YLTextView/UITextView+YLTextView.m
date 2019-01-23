@@ -32,6 +32,7 @@ static NSString *PLACEHOLDCOLOR = @"placeholdcolor";
 static NSString *LIMITCOLOR = @"limitcolor";
 static NSString *AUTOHEIGHT = @"autoheight";
 static NSString *OLDFRAME = @"oldframe";
+static NSString *INFOBLOCK = @"infoBlock";
 static const void *limitLengthKey = &limitLengthKey;
 static const void *limitLinesKey = &limitLinesKey;
 
@@ -140,6 +141,14 @@ static const void *limitLinesKey = &limitLinesKey;
 - (NSValue *)oldFrame {
     return objc_getAssociatedObject(self, &OLDFRAME);
 }
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+- (void)setInfoBlock:(textViewInfo)infoBlock {
+    objc_setAssociatedObject(self, &INFOBLOCK, infoBlock, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+- (textViewInfo)infoBlock {
+    return objc_getAssociatedObject(self, &INFOBLOCK);
+}
 #pragma mark -- 配置占位符标签
 
 - (void)setPlaceHolderLabel:(NSString *)placeholder {
@@ -178,12 +187,13 @@ static const void *limitLinesKey = &limitLinesKey;
     self.wordCountLabel.textAlignment = NSTextAlignmentRight;
     self.wordCountLabel.textColor = self.limitPlaceColor;
     self.wordCountLabel.font = self.limitPlaceFont;
+    self.wordCountLabel.backgroundColor = self.backgroundColor;
     if (self.text.length > [limitLength integerValue]) {
         self.text = [self.text substringToIndex:[self.limitLength intValue]];
     }
     self.wordCountLabel.text = [NSString stringWithFormat:@"%lu/%@",(unsigned long)self.text.length,limitLength];
     [self addSubview:self.wordCountLabel];
-    
+   
     self.contentInset = UIEdgeInsetsMake(0, 0, 20, 0);
 }
 
@@ -191,7 +201,6 @@ static const void *limitLinesKey = &limitLinesKey;
 
 - (void)textViewChanged:(NSNotification *)notification {
     NSInteger wordCount = self.text.length;
-    
     if (self.placeholder) {
         self.placeholderLabel.hidden = YES;
         if (wordCount == 0) {
@@ -234,8 +243,13 @@ static const void *limitLinesKey = &limitLinesKey;
         [UIView animateWithDuration:0.15 animations:^{
             self.frame = CGRectMake(oldRect.origin.x, oldRect.origin.y, oldRect.size.width, size.height + 25 <= oldRect.size.height ? oldRect.size.height : size.height + 25);
         }];
+        self.scrollEnabled = NO;
+    }else {
+        self.scrollEnabled = YES;
     }
-    
+    if (self.infoBlock) {
+        self.infoBlock(self.text, self.frame.size);
+    }
 }
 
 - (CGSize)getStringPlaceSize:(NSString *)string textFont:(UIFont *)font bundingSize:(CGSize)boundSize {
@@ -251,6 +265,7 @@ static const void *limitLinesKey = &limitLinesKey;
 }
 - (void)layoutSubviews {
     [super layoutSubviews];
+    self.bounces = NO;
     if (self.limitLength && self.wordCountLabel) {
         /*
          *  避免外部使用了约束 这里再次更新frame
