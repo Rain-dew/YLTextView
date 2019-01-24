@@ -20,7 +20,7 @@
     self.view.backgroundColor = [UIColor lightGrayColor];
     
     UITextView *textView = [[UITextView alloc] init];
-    textView.frame = CGRectMake(0, 0, 200, 120);
+    textView.frame = CGRectMake(0, 0, 203, 120);
     textView.center = self.view.center;
     textView.font = [UIFont systemFontOfSize:17];
     
