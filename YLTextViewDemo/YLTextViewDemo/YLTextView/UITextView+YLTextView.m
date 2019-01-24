@@ -33,8 +33,8 @@ static NSString *LIMITCOLOR = @"limitcolor";
 static NSString *AUTOHEIGHT = @"autoheight";
 static NSString *OLDFRAME = @"oldframe";
 static NSString *INFOBLOCK = @"infoBlock";
-static const void *limitLengthKey = &limitLengthKey;
-static const void *limitLinesKey = &limitLinesKey;
+static NSString *LIMITLENGTH = @"limitLengthKey";
+static NSString *LIMITLINES = @"limitLinesKey";
 
 #pragma mark -- set/get...
 
@@ -64,20 +64,20 @@ static const void *limitLinesKey = &limitLinesKey;
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 - (NSNumber *)limitLength {
-    return objc_getAssociatedObject(self, limitLengthKey);
+    return objc_getAssociatedObject(self, &LIMITLENGTH);
 }
 - (void)setLimitLength:(NSNumber *)limitLength {
-    objc_setAssociatedObject(self, limitLengthKey, limitLength, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &LIMITLENGTH, limitLength, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
     [self setWordcountLable:limitLength];
 }
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 - (NSNumber *)limitLines {
-    return objc_getAssociatedObject(self, limitLinesKey);
+    return objc_getAssociatedObject(self, &LIMITLINES);
 }
 - (void)setLimitLines:(NSNumber *)limitLines {
-    objc_setAssociatedObject(self, limitLinesKey, limitLines, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    objc_setAssociatedObject(self, &LIMITLINES, limitLines, OBJC_ASSOCIATION_COPY_NONATOMIC);
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textViewChanged:) name:UITextViewTextDidChangeNotification object:self];
 }
 
@@ -183,7 +183,7 @@ static const void *limitLinesKey = &limitLinesKey;
     /*
      *  字数限制
      */
-    self.wordCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 10, 20)];
+    self.wordCountLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.frame) - 20, CGRectGetWidth(self.frame) - 7, 20)];
     self.wordCountLabel.textAlignment = NSTextAlignmentRight;
     self.wordCountLabel.textColor = self.limitPlaceColor;
     self.wordCountLabel.font = self.limitPlaceFont;
@@ -229,13 +229,16 @@ static const void *limitLinesKey = &limitLinesKey;
         self.wordCountLabel.text = [NSString stringWithFormat:@"%ld/%@",(long)wordCount,self.limitLength];
     }else {
         if (self.limitLines) {//行数限制
-            CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
-            if (size.height > self.font.lineHeight * [self.limitLines intValue]) {
-                self.text = [self.text substringToIndex:self.text.length - 1];
+            float limitHeight = self.font.lineHeight * [self.limitLines intValue];
+            if ([self getTextContentSize].height > limitHeight) {
+                while ([self getTextContentSize].height > limitHeight) {
+                    self.text = [self.text substringToIndex:self.text.length - 1];
+                }
                 NSLog(@"已经是最大行数/n行数限制，没有做右下角label提示,若有此需求,联系我");
             }
             /*行数的限制，没有做右下角提示*/
         }
+        
     }
     if (self.autoHeight) {
         CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(CGRectGetWidth(self.frame), MAXFLOAT)];
@@ -251,7 +254,9 @@ static const void *limitLinesKey = &limitLinesKey;
         self.infoBlock(self.text, self.frame.size);
     }
 }
-
+- (CGSize)getTextContentSize {
+    return [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(self.contentSize.width-10, CGFLOAT_MAX)];
+}
 - (CGSize)getStringPlaceSize:(NSString *)string textFont:(UIFont *)font bundingSize:(CGSize)boundSize {
     //计算文本高度
     NSDictionary *attribute = @{NSFontAttributeName:font};
@@ -270,7 +275,7 @@ static const void *limitLinesKey = &limitLinesKey;
         /*
          *  避免外部使用了约束 这里再次更新frame
          */
-        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 10, 20);
+        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 7, 20);
     }
     if (self.placeholder && self.placeholderLabel) {
         CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
