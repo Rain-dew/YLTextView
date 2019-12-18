@@ -58,3 +58,6 @@ fastlane/screenshots
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+YLTextViewDemo/YLTextView_SwitDemo/YLTextView_Swit.xcodeproj/project.xcworkspace/xcshareddata
+YLTextViewDemo/YLTextViewDemo.xcodeproj/project.xcworkspace/xcuserdata/raindew.xcuserdatad/UserInterfaceState.xcuserstate
+YLTextViewDemo/YLTextViewDemo.xcodeproj/project.xcworkspace/xcshareddata

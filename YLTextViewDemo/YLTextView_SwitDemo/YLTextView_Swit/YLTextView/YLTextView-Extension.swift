@@ -182,7 +182,8 @@ extension UITextView {
      *  动态监听
      */
     @objc fileprivate func textChange(_ notification : Notification) {
-
+        let textView = notification.object as! UITextView;
+        self.text = textView.text;
         if placeholder != nil {
             placeholderLabel?.isHidden = true
             if self.text.count ==  0 {
@@ -214,11 +215,15 @@ extension UITextView {
             }
         }else {
             if (limitLines != nil) {//行数限制
-                let size = getStringPlaceSize(self.text, textFont: self.font!)
+                var size = getStringPlaceSize(self.text, textFont: self.font!)
                 let height = self.font!.lineHeight * CGFloat(limitLines!.floatValue)
                 if (size.height > height) {
-                    self.text = (self.text as NSString).substring(to: self.text.count - 1)
                     print("Maximum number of lines");
+                    //循环计算当前高度可以存放的字符
+                    while size.height > height {
+                        self.text = (self.text as NSString).substring(to: self.text.count - 1)
+                        size = getStringPlaceSize(self.text, textFont: self.font!)
+                    }
                 }
             }
         }

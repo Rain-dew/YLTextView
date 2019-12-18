@@ -16,8 +16,8 @@ class ViewController: UIViewController {
         let textview = UITextView(frame: CGRect(x: 100, y: 100, width: 200, height: 150))
 //        textview.text = "如果你想对textView.text直接赋值。请在设置属性之前进行，否则影响计算"
         textview.placeholder = "喜欢请Star"
-        textview.limitLength = 20
-//        textview.limitLines = 4;
+//        textview.limitLength = 20
+        textview.limitLines = 2;
         textview.center = self.view.center
         view.addSubview(textview)
     }
