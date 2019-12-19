@@ -231,7 +231,8 @@ extension UITextView {
     
     @objc fileprivate func getStringPlaceSize(_ string : String, textFont : UIFont) -> CGSize {
         ///计算文本高度
-        let attribute = [NSAttributedString.Key.font : textFont];
+        let font : UIFont = textFont ?? UIFont.systemFont(ofSize: 12)
+        let attribute = [NSAttributedString.Key.font : font];
         let options = NSStringDrawingOptions.usesLineFragmentOrigin
         let size = string.boundingRect(with: CGSize(width: self.contentSize.width-10, height: CGFloat.greatestFiniteMagnitude), options: options, attributes: attribute, context: nil).size
         return size
