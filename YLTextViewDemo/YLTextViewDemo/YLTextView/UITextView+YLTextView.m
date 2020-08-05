@@ -241,10 +241,10 @@ static NSString *LIMITLINES = @"limitLinesKey";
         
     }
     if (self.autoHeight) {
-        CGSize size = [self getStringPlaceSize:self.text textFont:self.font bundingSize:CGSizeMake(CGRectGetWidth(self.frame), MAXFLOAT)];
+        CGSize size = [self getTextContentSize];
         CGRect oldRect = self.oldFrame.CGRectValue;
         [UIView animateWithDuration:0.15 animations:^{
-            self.frame = CGRectMake(oldRect.origin.x, oldRect.origin.y, oldRect.size.width, size.height + 25 <= oldRect.size.height ? oldRect.size.height : size.height + 25);
+            self.frame = CGRectMake(oldRect.origin.x, oldRect.origin.y, oldRect.size.width, oldRect.size.height > size.height + 30 ? oldRect.size.height : size.height + 30);
         }];
         self.scrollEnabled = NO;
     }else {
@@ -283,7 +283,9 @@ static NSString *LIMITLINES = @"limitLinesKey";
     }
     if ([self.autoHeight isEqual:@1]) {
         CGRect currentFrame = self.frame;
-        self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+        if (!self.oldFrame) {
+            self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+        }
     }
 }
 

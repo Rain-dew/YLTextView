@@ -21,9 +21,9 @@ typedef void(^textViewInfo)(NSString *text,CGSize textViewSize);
 
 @property (nonatomic,strong) NSString *placeholder;//占位符,可与下面属性任意一个同时设置
 
-@property (nonatomic,  copy) NSNumber *limitLength;//需要限制的字数          优先级高于lines
+@property(nonatomic,  copy) NSNumber *limitLength;//需要限制的字数          优先级高于lines
 
-@property (nonatomic,  copy) NSNumber *limitLines;//需要限制的行数
+@property(nonatomic,  copy) NSNumber *limitLines;//需要限制的行数
 
 @property(nonatomic, strong) UIFont   *placeholdFont;//占位符文字          默认13号字体
 

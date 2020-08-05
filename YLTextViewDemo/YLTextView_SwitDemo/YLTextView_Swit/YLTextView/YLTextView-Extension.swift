@@ -256,7 +256,9 @@ extension UITextView {
             placeholderLabel!.frame = CGRect(x: 7, y: 7, width: rect.size.width, height: rect.size.height)
         }
         if autoHeight == true {
-            self.oldFrame = self.frame
+            if self.oldFrame == nil {
+                self.oldFrame = self.frame
+            }
             self.isScrollEnabled = false
         }else {
             self.isScrollEnabled = true
