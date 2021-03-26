@@ -36,6 +36,35 @@ static NSString *INFOBLOCK = @"infoBlock";
 static NSString *LIMITLENGTH = @"limitLengthKey";
 static NSString *LIMITLINES = @"limitLinesKey";
 
++ (void)load {
+    // 系统方法
+    Method system_method = class_getInstanceMethod([self class], @selector(layoutSubviews));
+    // 将要替换系统方法
+    Method my_method = class_getInstanceMethod([self class], @selector(yl_layoutSubviews));
+    // 进行交换
+    method_exchangeImplementations(system_method, my_method);
+}
+
+- (void)yl_layoutSubviews {
+    [super layoutSubviews];
+    self.bounces = NO;
+    if (self.limitLength && self.wordCountLabel) {
+        /*
+         *  避免外部使用了约束 这里再次更新frame
+         */
+        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 7, 20);
+    }
+    if (self.placeholder && self.placeholderLabel) {
+        CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
+        self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
+    }
+    if ([self.autoHeight isEqual:@1]) {
+        CGRect currentFrame = self.frame;
+        if (!self.oldFrame) {
+            self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+        }
+    }
+}
 #pragma mark -- set/get...
 
 - (void)setPlaceholderLabel:(UILabel *)placeholderLabel {
@@ -267,26 +296,6 @@ static NSString *LIMITLINES = @"limitLinesKey";
 
 - (void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:self];
-}
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    self.bounces = NO;
-    if (self.limitLength && self.wordCountLabel) {
-        /*
-         *  避免外部使用了约束 这里再次更新frame
-         */
-        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 7, 20);
-    }
-    if (self.placeholder && self.placeholderLabel) {
-        CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
-        self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
-    }
-    if ([self.autoHeight isEqual:@1]) {
-        CGRect currentFrame = self.frame;
-        if (!self.oldFrame) {
-            self.oldFrame = [NSValue valueWithCGRect:currentFrame];
-        }
-    }
 }
 
 @end
