@@ -46,7 +46,6 @@ static NSString *LIMITLINES = @"limitLinesKey";
 }
 
 - (void)yl_layoutSubviews {
-    [super layoutSubviews];
     self.bounces = NO;
     if (self.limitLength && self.wordCountLabel) {
         /*
