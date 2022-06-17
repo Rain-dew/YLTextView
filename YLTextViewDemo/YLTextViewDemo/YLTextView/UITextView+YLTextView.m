@@ -47,22 +47,24 @@ static NSString *LIMITLINES = @"limitLinesKey";
 
 - (void)yl_layoutSubviews {
     self.bounces = NO;
-    if (self.limitLength && self.wordCountLabel) {
-        /*
-         *  避免外部使用了约束 这里再次更新frame
-         */
-        self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 7, 20);
-    }
-    if (self.placeholder && self.placeholderLabel) {
-        CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
-        self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
-    }
-    if ([self.autoHeight isEqual:@1]) {
-        CGRect currentFrame = self.frame;
-        if (!self.oldFrame) {
-            self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{//获取frame
+        if (self.limitLength && self.wordCountLabel) {
+            /*
+             *  避免外部使用了约束 这里再次更新frame
+             */
+            self.wordCountLabel.frame = CGRectMake(0, CGRectGetHeight(self.frame) - 20 + self.contentOffset.y, CGRectGetWidth(self.frame) - 7, 20);
         }
-    }
+        if (self.placeholder && self.placeholderLabel) {
+            CGRect rect = [self.placeholder boundingRectWithSize:CGSizeMake(CGRectGetWidth(self.frame)-7, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName: self.placeholdFont} context:nil];
+            self.placeholderLabel.frame = CGRectMake(7, 7, rect.size.width, rect.size.height);
+        }
+        if ([self.autoHeight isEqual:@1]) {
+            CGRect currentFrame = self.frame;
+            if (!self.oldFrame) {
+                self.oldFrame = [NSValue valueWithCGRect:currentFrame];
+            }
+        }
+    });
 }
 #pragma mark -- set/get...
 
