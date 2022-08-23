@@ -17,9 +17,9 @@
     textView.center = self.view.center;
     textView.font = [UIFont systemFontOfSize:17];
     
-//    textView.text = @"请写在自定义属性前面，如果长度大于limitLength设置长度会被自动截断。";
+//    textView.text = @"我是一段文字，很长很长真的很长";
     textView.placeholder = @"我是一个占位符";
-    textView.limitLength = @200;
+    textView.limitLength = @10;
     textView.placeholdColor = [UIColor redColor];
     textView.limitPlaceColor = [UIColor redColor];
     textView.placeholdFont = [UIFont systemFontOfSize:17];
