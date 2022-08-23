@@ -77,8 +77,12 @@ static NSString *TEXT = @"text";
 // 重写setText
 - (void)yl_setText:(NSString *)text {
     [self yl_setText:text];
-    self.placeholder = self.placeholder;
-    self.limitLength = self.limitLength;
+    if (self.placeholder) {
+        self.placeholder = self.placeholder;
+    }
+    if (self.limitLength) {
+        self.limitLength = self.limitLength;
+    }
 }
 
 #pragma mark -- set/get...
