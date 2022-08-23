@@ -35,14 +35,22 @@ static NSString *OLDFRAME = @"oldframe";
 static NSString *INFOBLOCK = @"infoBlock";
 static NSString *LIMITLENGTH = @"limitLengthKey";
 static NSString *LIMITLINES = @"limitLinesKey";
+static NSString *TEXT = @"text";
 
 + (void)load {
-    // 系统方法
-    Method system_method = class_getInstanceMethod([self class], @selector(layoutSubviews));
-    // 将要替换系统方法
-    Method my_method = class_getInstanceMethod([self class], @selector(yl_layoutSubviews));
+    // 系统方法layoutSubviews
+    Method system_method_layoutSubviews = class_getInstanceMethod([self class], @selector(layoutSubviews));
+    // 将要替换系统方法layoutSubviews
+    Method my_method_layoutSubviews = class_getInstanceMethod([self class], @selector(yl_layoutSubviews));
     // 进行交换
-    method_exchangeImplementations(system_method, my_method);
+    method_exchangeImplementations(system_method_layoutSubviews, my_method_layoutSubviews);
+    
+    // 系统方法 text
+    Method system_method_text = class_getInstanceMethod([self class], @selector(setText:));
+    // 将要替换系统方法 text
+    Method my_method_text = class_getInstanceMethod([self class], @selector(yl_setText:));
+    // 进行交换
+    method_exchangeImplementations(system_method_text, my_method_text);
 }
 
 - (void)yl_layoutSubviews {
@@ -66,6 +74,13 @@ static NSString *LIMITLINES = @"limitLinesKey";
         }
     });
 }
+// 重写setText
+- (void)yl_setText:(NSString *)text {
+    [self yl_setText:text];
+    self.placeholder = self.placeholder;
+    self.limitLength = self.limitLength;
+}
+
 #pragma mark -- set/get...
 
 - (void)setPlaceholderLabel:(UILabel *)placeholderLabel {
